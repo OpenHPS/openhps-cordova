@@ -1,0 +1,1 @@
+This application is based on the guide: https://cordova.apache.org/docs/en/10.x/guide/cli/
