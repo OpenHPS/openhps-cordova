@@ -23,6 +23,7 @@ export class WLANSourceNode extends SourceNode<DataFrame> {
             document.addEventListener(
                 'deviceready',
                 function () {
+                    this.logger("debug", "Initializing Wi-Fi scanning ...");
                     this.WifiWizard2.isWifiEnabled()
                         .then((status: boolean) => {
                             if (!status) {
@@ -63,7 +64,7 @@ export class WLANSourceNode extends SourceNode<DataFrame> {
                 this.push(this.parseList(wifiList));
             })
             .catch((ex: Error) => {
-                this.logger('error', ex);
+                this.logger('error', 'Unable to perform Wi-Fi scan!', ex);
             })
             .finally(() => {
                 if (!this._running || this._timer !== scanId) {
