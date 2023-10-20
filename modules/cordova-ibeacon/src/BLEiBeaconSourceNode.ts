@@ -44,10 +44,7 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
                 return;
             }
             this.currentRegions = this.options.uuids.map((uuid) => {
-                return {
-                    identifier: uuid,
-                    uuid,
-                };
+                return BeaconPlugin.IBeacon.BeaconRegion(uuid, uuid);
             });
             this.delegate.didRangeBeaconsInRegion().subscribe(
                 (data: BeaconPlugin.IBeaconPluginResult) => {
@@ -89,7 +86,10 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
                 .then(() => {
                     resolve();
                 })
-                .catch(reject);
+                .catch((err) => {
+                    this.currentRegions = [];
+                    reject(err);
+                });
         });
     }
 
