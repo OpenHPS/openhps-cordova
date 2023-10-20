@@ -17,9 +17,13 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
     }
 
     private _onBleInit(): Promise<void> {
-        return new Promise<void>((resolve) => {
-            this.delegate = BeaconPlugin.IBeacon.Delegate();
-            resolve();
+        return new Promise<void>((resolve, reject) => {
+            BeaconPlugin.IBeacon.requestWhenInUseAuthorization()
+                .then(() => {
+                    this.delegate = BeaconPlugin.IBeacon.Delegate();
+                    resolve();
+                })
+                .catch(reject);
         });
     }
 
@@ -79,14 +83,11 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
             );
 
             BeaconPlugin.IBeacon.setDelegate(this.delegate);
-            BeaconPlugin.IBeacon.requestWhenInUseAuthorization()
-                .then(() => {
-                    return Promise.all(
-                        this.currentRegions.map((region) => {
-                            return BeaconPlugin.IBeacon.startRangingBeaconsInRegion(region);
-                        }),
-                    );
-                })
+            Promise.all(
+                this.currentRegions.map((region) => {
+                    return BeaconPlugin.IBeacon.startRangingBeaconsInRegion(region);
+                }),
+            )
                 .then(() => {
                     resolve();
                 })
