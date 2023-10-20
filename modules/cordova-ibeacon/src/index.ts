@@ -1,1 +1,1 @@
-export * from './iBeaconSourceNode';
+export * from './BLEiBeaconSourceNode';

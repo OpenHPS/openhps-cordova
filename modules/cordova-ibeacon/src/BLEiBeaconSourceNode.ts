@@ -3,10 +3,10 @@ import { IBeaconDelegate } from '@awesome-cordova-plugins/ibeacon';
 import * as BeaconPlugin from '@awesome-cordova-plugins/ibeacon';
 import { BLEiBeacon, BLEUUID, RelativeRSSI } from '@openhps/rf';
 
-export class iBeaconSourceNode extends SourceNode<DataFrame> {
+export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
     protected options: iBeaconSourceNodeOptions;
     protected delegate: IBeaconDelegate;
-    protected currentRegions: BeaconPlugin.BeaconRegion[];
+    protected currentRegions: BeaconPlugin.BeaconRegion[] = [];
 
     constructor(options?: iBeaconSourceNodeOptions) {
         super(options);
