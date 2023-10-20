@@ -1,9 +1,14 @@
 {
-    "entryPoints": ["../src/index.ts"],
     "out": "out",
-    "exclude": ["**/_internal/**/*"],
+    "entryPointStrategy": "packages",
+    "entryPoints": [
+        "../modules/cordova-bluetooth",
+        "../modules/cordova-wlan",
+        "../modules/cordova-ibeacon"
+    ],
     "excludePrivate": true,
     "hideGenerator": true,
     "categorizeByGroup": true,
-    "media": "media"
+    "media": "media",
+    "logLevel": "Verbose"
 }

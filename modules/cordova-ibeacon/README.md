@@ -1,13 +1,13 @@
 <h1 align="center">
   <img alt="OpenHPS" src="https://openhps.org/images/logo_text-512.png" width="40%" /><br />
-  OpenHPS Cordova/Phonegap Components
+  @openhps/cordova-ibeacon
 </h1>
 <p align="center">
     <a href="https://github.com/OpenHPS/openhps-cordova/actions/workflows/main.yml" target="_blank">
         <img alt="Build Status" src="https://github.com/OpenHPS/openhps-cordova/actions/workflows/main.yml/badge.svg">
     </a>
     <a href="https://codecov.io/gh/OpenHPS/openhps-cordova">
-        <img src="https://codecov.io/gh/OpenHPS/openhps-cordova/branch/master/graph/badge.svg"/>
+        <img src="https://codecov.io/gh/OpenHPS/openhps-capcordovaacitor/branch/master/graph/badge.svg"/>
     </a>
     <a href="https://codeclimate.com/github/OpenHPS/openhps-cordova/" target="_blank">
         <img alt="Maintainability" src="https://img.shields.io/codeclimate/maintainability/OpenHPS/openhps-cordova">
@@ -22,21 +22,17 @@
 </h3>
 
 <br />
-This is a monorepo for all cordova components of OpenHPS. 
+This component adds a Bluetooth Scanning source node to OpenHPS to scan for BLE beacons or other BLE objects. The component uses
+a cordova plugin to scan for BLE beacons on Android and iOS.
 
-## Installation
+## Getting Started
+If you have [npm installed](https://www.npmjs.com/get-npm), start using @openhps/cordova-bluetooth with the following command.
+```bash
+npm install @openhps/cordova-bluetooth --save
+```
+## Usage
 
-`yarn workspaces run build`
-
-## Commit
-
-### Linting
-Make sure to run `yarn run lint -- --fix` to fix and detect any linting issues. Ensure there are no errors
-or warnings.
-
-### Testing
-Test any changes using `yarn run test` which will perform unit tests on existing features. Contributors are expected
-to create unit tests for new features.
+1. Install `@awesome-cordova-plugins/ble`
 
 ## Contributors
 The framework is open source and is mainly developed by PhD Student Maxim Van de Wynckel as part of his research towards *Hybrid Positioning and Implicit Human-Computer Interaction* under the supervision of Prof. Dr. Beat Signer.

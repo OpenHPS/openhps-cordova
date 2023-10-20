@@ -1,0 +1,59 @@
+{
+  "name": "@openhps/cordova-bluetooth",
+  "version": "0.1.0",
+  "description": "Open Hybrid Positioning System - Cordova Bluetooth Scanning",
+  "author": "Maxim Van de Wynckel",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenHPS/openhps-cordova.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenHPS/openhps-cordova/issues"
+  },
+  "homepage": "https://openhps.org",
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/types/index.d.ts",
+  "unpkg": "./dist/web/openhps-cordova-bluetooth.min.js",
+  "jsdelivr": "./dist/web/openhps-cordova-bluetooth.min.js",
+  "module": "./dist/esm5/index.js",
+  "es2015": "./dist/esm/index.js",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "keywords": [
+    "openhps",
+    "capacitor"
+  ],
+  "scripts": {
+    "test": "cross-env ../../node_modules/.bin/mocha --config test/.mocharc.json",
+    "cover": "cross-env ../../node_modules/.bin/nyc cross-env ../../node_modules/.bin/mocha --config test/.mocharc.json && cross-env ../../node_modules/.bin/nyc report --reporter=cobertura",
+    "cover:ci": "cross-env ../../node_modules/.bin/nyc cross-env ../../node_modules/.bin/mocha --config test/.mocharc.json --reporter mocha-junit-reporter && cross-env ../../node_modules/.bin/nyc report --reporter=cobertura",
+    "build": "cross-env ../../node_modules/.bin/npm-run-all --parallel build:ts:* && npm run build:webpack",
+    "build:quick": "cross-env ../../node_modules/.bin/npm-run-all --parallel build:ts:* && npm run build:webpack",
+    "build:typedoc": "cross-env ../../node_modules/.bin/typedoc --options docs/typedoc.json",
+    "build:ts:cjs": "cross-env ../../node_modules/.bin/tsc --build tsconfig/tsconfig.bundle.cjs.json",
+    "build:ts:esm": "cross-env ../../node_modules/.bin/tsc --build tsconfig/tsconfig.bundle.esm.json",
+    "build:ts:esm5": "cross-env ../../node_modules/.bin/tsc --build tsconfig/tsconfig.bundle.esm5.json",
+    "build:ts:types": "cross-env ../../node_modules/.bin/tsc --build tsconfig/tsconfig.bundle.types.json",
+    "build:webpack": "cross-env ../../node_modules/.bin/npm-run-all --parallel build:webpack:*",
+    "build:webpack:prod": "cross-env ../../node_modules/.bin/webpack --env prod --",
+    "build:webpack:dev": "cross-env ../../node_modules/.bin/webpack --env dev --"
+  },
+  "peerDependencies": {
+    "@openhps/core": ">=0.3.2",
+    "@openhps/rf": ">=0.1.45",
+    "@awesome-cordova-plugins/ble": ">=6.4.0"
+  },
+  "devDependencies": {
+    "@capacitor/core": "^5.5.0",
+    "@openhps/rf": ">=0.1.45",
+    "cross-env": "^7.0.3",
+    "@awesome-cordova-plugins/ble": "^6.4.0"
+  }
+}

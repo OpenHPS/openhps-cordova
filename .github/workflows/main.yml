@@ -2,53 +2,279 @@ name: CI
 
 on:
   push:
-    branches: [ master, dev ]
+    branches: [ master, main, dev ]
   pull_request:
-    branches: [ master, dev ]
+    branches: [ master, main, dev ]
   workflow_dispatch:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Load dependency cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-dependencies-v1-${{ hashFiles('package.json') }}
+      - name: Load build cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/dist
+            **/modules/*/dist
+          key: ${{ runner.os }}-build-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
+      - name: Installing dependencies
+        run: |
+          yarn install
       - name: Build
         run: |
-          npm install
-          npm run build
-      - name: Quality
-        run: |
-          npm run lint
-      - name: Publish Web Artifacts
+          yarn workspaces run build
+      - name: Upload web artifacts
         uses: actions/upload-artifact@v2
         with:
           name: web
           path: |
-            dist/web/*
-            !dist/web/*.txt
+            **/dist/web/*
+            !**/dist/web/*.txt
+
+  quality:
+    name: Code quality
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load dependency cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-dependencies-v1-${{ hashFiles('package.json') }}
+      - name: Load build cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/dist
+            **/modules/*/dist
+          key: ${{ runner.os }}-build-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
+      - name: Quality
+        run: |
+          yarn run lint
+
+  test_coverage:
+    name: Unit tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load dependency cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-dependencies-v1-${{ hashFiles('package.json') }}
+      - name: Load build cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/dist
+            **/modules/*/dist
+          key: ${{ runner.os }}-build-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
+      - name: Load test and coverage cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/test-results.xml
+            **/coverage
+          key: ${{ runner.os }}-test-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
+      - name: Test
+        run: |
+          yarn workspaces run cover:ci
+
+  documentation:
+    name: Build documentation
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load dependency cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-dependencies-v1-${{ hashFiles('package.json') }}
+      - name: Load build cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/dist
+            **/modules/*/dist
+          key: ${{ runner.os }}-build-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
+      - name: Load document cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/docs/out
+          key: ${{ runner.os }}-docs-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
+      - name: Build documentation
+        run: |
+          yarn run build:typedoc
+
+
+  publish_documentation:
+    name: Publish documentation
+    needs:
+      - documentation
+      - quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load document cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/docs/out
+          key: ${{ runner.os }}-docs-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
       - name: Publish Documentation
         uses: actions/upload-artifact@v2
         with:
           name: docs
           path: |
             docs/out/*
+      - name: Deploy site to GitHub
+        if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/out
+
+  publish_test_coverage:
+    name: Publish unit tests and coverage
+    needs: test_coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load test and coverage cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/test-results.xml
+            **/coverage
+          key: ${{ runner.os }}-test-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
+      - name: Publish unit test results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: '**/test-results.xml'
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v2
+        with:
+          files: '**/coverage/cobertura-coverage.xml'
+          verbose: true
+    
+  release_dev:
+    name: Release DEV
+    needs:
+      - build
+      - quality
+      - test_coverage
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load dependency cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-dependencies-v1-${{ hashFiles('package.json') }}
+      - name: Load build cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/dist
+            **/modules/*/dist
+          key: ${{ runner.os }}-build-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
       - name: Configure Publish
         run: |
           git config --global user.name 'CI'
           git config --global user.email 'ci@openhps.org'
       - name: Bump version development
-        if: github.ref == 'refs/heads/dev'
         run: |
-          npm run bump:development
-      - name: Bump version release
-        if: github.ref == 'refs/heads/master'
-        run: |
-          npm run bump:release
-      - name: Publish to NPM
+          yarn run bump:development
+      - name: Publish to NPM (dev)
         uses: JS-DevTools/npm-publish@v1
-        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
         with:
           token: ${{ secrets.NPM_TOKEN }}
+          tag: dev
+          package: ./modules/cordova-bluetooth/package.json
+      - name: Publish to NPM (dev)
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: dev
+          package: ./modules/cordova-wlan/package.json
+      - name: Publish to NPM (dev)
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: dev
+          package: ./modules/cordova-ibeacon/package.json
+      - name: Publish to GitHub
+        if: success()
+        run: |
+          git push
+  
+  release_master:
+    name: Release MASTER
+    needs:
+      - build
+      - quality
+      - test_coverage
+    runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load dependency cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-dependencies-v1-${{ hashFiles('package.json') }}
+      - name: Load build cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/dist
+            **/modules/*/dist
+          key: ${{ runner.os }}-build-v1-${{ hashFiles('package.json') }}-${{ github.run_number }}
+      - name: Configure Publish
+        run: |
+          git config --global user.name 'CI'
+          git config --global user.email 'ci@openhps.org'
+      - name: Bump version release
+        run: |
+          yarn run bump:release
+      - name: Publish to NPM (master)
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: latest
+          package: ./modules/cordova-bluetooth/package.json
+      - name: Publish to NPM (master)
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: latest
+          package: ./modules/cordova-wlan/package.json
+      - name: Publish to NPM (master)
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: latest
+          package: ./modules/cordova-ibeacon/package.json
       - name: Publish to GitHub
         if: success()
         run: |
