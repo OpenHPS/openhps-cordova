@@ -1,6 +1,6 @@
 {
   "name": "@openhps/cordova-wlan",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Open Hybrid Positioning System - Cordova WLAN Scanning",
   "author": "Maxim Van de Wynckel",
   "license": "Apache-2.0",
