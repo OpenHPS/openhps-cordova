@@ -1,7 +1,7 @@
 import { DataFrame, SourceNode, SensorSourceOptions } from '@openhps/core';
 import { IBeaconDelegate } from '@awesome-cordova-plugins/ibeacon';
 import * as BeaconPlugin from '@awesome-cordova-plugins/ibeacon';
-import { BLEiBeacon, BLEUUID, RelativeRSSI } from '@openhps/rf';
+import { BLEiBeacon, BLEObject, BLEUUID, RelativeRSSI } from '@openhps/rf';
 
 export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
     protected options: iBeaconSourceNodeOptions;
@@ -13,6 +13,7 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
         this.options.uuids = this.options.uuids || null;
         this.once('build', this._onBleInit.bind(this));
         this.once('destroy', this.stop.bind(this));
+        this.options.source = this.source ?? new BLEObject();
     }
 
     private _onBleInit(): Promise<void> {
@@ -50,6 +51,9 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
                 (data: BeaconPlugin.IBeaconPluginResult) => {
                     if (this.options.debug) {
                         console.log(data);
+                    }
+                    if (data.beacons.length === 0) {
+                        return;
                     }
                     const frame = new DataFrame();
                     frame.source = this.source;
