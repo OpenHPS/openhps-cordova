@@ -45,7 +45,7 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
     public start(): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.currentRegions.length > 0) {
-                reject(new Error('Please stop iBeaocn scanning before starting a new scan!'));
+                reject(new Error('Please stop iBeacon scanning before starting a new scan!'));
                 return;
             }
             this.currentRegions = this.options.uuids.map((uuid) => {
@@ -56,7 +56,8 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
                     if (this.options.debug) {
                         console.log(data);
                     }
-                    if (data.beacons.length === 0) {
+                    // Check if data is valid
+                    if (data === undefined || data.beacons.length === 0) {
                         return;
                     }
                     const frame = new DataFrame();
@@ -104,8 +105,18 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
         });
     }
 
-    setProximityUUIDs(uuids: string[]): void {
+    /**
+     * Set the Proximity UUIDs for iBeacon scanning.
+     * @param uuids
+     */
+    async setProximityUUIDs(uuids: string[]): Promise<void> {
         this.options.uuids = uuids;
+        // Stop (if running)
+        if (this.currentRegions.length > 0) {
+            await this.stop();
+            // Restart
+            await this.start();
+        }
     }
 }
 

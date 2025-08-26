@@ -9,6 +9,5 @@
     "excludePrivate": true,
     "hideGenerator": true,
     "categorizeByGroup": true,
-    "media": "media",
     "logLevel": "Verbose"
 }

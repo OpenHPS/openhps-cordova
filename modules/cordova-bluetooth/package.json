@@ -1,6 +1,6 @@
 {
   "name": "@openhps/cordova-bluetooth",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "description": "Open Hybrid Positioning System - Cordova Bluetooth Scanning",
   "author": "Maxim Van de Wynckel",
   "license": "Apache-2.0",
