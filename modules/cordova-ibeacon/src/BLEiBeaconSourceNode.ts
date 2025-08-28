@@ -20,7 +20,6 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
         return new Promise<void>((resolve, reject) => {
             BeaconPlugin.IBeacon.requestWhenInUseAuthorization()
                 .then(() => {
-                    this.delegate = BeaconPlugin.IBeacon.Delegate();
                     resolve();
                 })
                 .catch(reject);
@@ -36,6 +35,7 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
             )
                 .then(() => {
                     this.currentRegions = [];
+                    this.delegate = null;
                     resolve();
                 })
                 .catch(reject);
@@ -51,6 +51,7 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
             this.currentRegions = this.options.uuids.map((uuid) => {
                 return BeaconPlugin.IBeacon.BeaconRegion(uuid, uuid);
             });
+            this.delegate = BeaconPlugin.IBeacon.Delegate();
             this.delegate.didRangeBeaconsInRegion().subscribe(
                 (data: BeaconPlugin.IBeaconPluginResult) => {
                     if (this.options.debug) {
