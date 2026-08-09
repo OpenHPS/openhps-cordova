@@ -12,8 +12,8 @@
     <a href="https://codeclimate.com/github/OpenHPS/openhps-cordova/" target="_blank">
         <img alt="Maintainability" src="https://img.shields.io/codeclimate/maintainability/OpenHPS/openhps-cordova">
     </a>
-    <a href="https://badge.fury.io/js/@openhps%cordova">
-        <img src="https://badge.fury.io/js/@openhps%2Fcordova.svg" alt="npm version" height="18">
+    <a href="https://badge.fury.io/js/@openhps%2Fcordova-ibeacon">
+        <img src="https://badge.fury.io/js/@openhps%2Fcordova-ibeacon" alt="npm version" height="18">
     </a>
 </p>
 

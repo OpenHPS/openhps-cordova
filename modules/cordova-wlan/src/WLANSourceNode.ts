@@ -5,7 +5,6 @@ import { WLANObject, RelativeRSSI } from '@openhps/rf';
  * WLAN source node
  */
 export class WLANSourceNode extends SourceNode<DataFrame> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     protected WifiWizard2 = require('wifiwizard2');
     protected options: SensorSourceOptions;
     private _timer: number;
