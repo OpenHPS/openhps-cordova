@@ -12,8 +12,8 @@
     <a href="https://codeclimate.com/github/OpenHPS/openhps-capacitor/" target="_blank">
         <img alt="Maintainability" src="https://img.shields.io/codeclimate/maintainability/OpenHPS/openhps-capacitor">
     </a>
-    <a href="https://badge.fury.io/js/@openhps%capacitor">
-        <img src="https://badge.fury.io/js/@openhps%2Fcapacitor.svg" alt="npm version" height="18">
+    <a href="https://badge.fury.io/js/@openhps%2Fcordova-wlan">
+        <img src="https://badge.fury.io/js/@openhps%2Fcordova-wlan" alt="npm version" height="18">
     </a>
 </p>
 
