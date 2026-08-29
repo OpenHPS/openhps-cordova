@@ -52,7 +52,7 @@
     "devDependencies": {
         "@capacitor/core": "^5.5.0",
         "@openhps/rf": "^1.0.4",
-        "cross-env": "^7.0.3",
+        "cross-env": "^10.1.0",
         "@awesome-cordova-plugins/ble": "^6.4.0",
         "@openhps/core": "^1.0.16"
     },
