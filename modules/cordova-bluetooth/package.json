@@ -45,16 +45,16 @@
         "build:webpack:dev": "cross-env ../../node_modules/.bin/webpack --env dev --"
     },
     "peerDependencies": {
+        "@awesome-cordova-plugins/ble": ">=6.4.0",
         "@openhps/core": ">=1.0.16 <2",
-        "@openhps/rf": ">=1.0.4 <2",
-        "@awesome-cordova-plugins/ble": ">=6.4.0"
+        "@openhps/rf": ">=1.0.4 <2"
     },
     "devDependencies": {
+        "@awesome-cordova-plugins/ble": "^9.7.0",
         "@capacitor/core": "^5.5.0",
+        "@openhps/core": "^1.0.16",
         "@openhps/rf": "^1.0.4",
-        "cross-env": "^7.0.3",
-        "@awesome-cordova-plugins/ble": "^6.4.0",
-        "@openhps/core": "^1.0.16"
+        "cross-env": "^10.1.0"
     },
     "exports": {
         ".": {
