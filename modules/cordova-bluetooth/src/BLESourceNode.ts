@@ -1,16 +1,19 @@
 import { DataFrame, SourceNode, SensorSourceOptions } from '@openhps/core';
 import { BLEObject, MACAddress, RelativeRSSI } from '@openhps/rf';
 import { BLE } from '@awesome-cordova-plugins/ble';
+import type { Subscription } from 'rxjs';
 
 /**
- * BLE source node using cordova-plugin-ibeacon.
+ * BLE source node using `@awesome-cordova-plugins/ble`.
  */
 export class BLESourceNode extends SourceNode<DataFrame> {
     protected options: BLESourceNodeOptions;
+    private _subscription: Subscription;
 
     constructor(options?: BLESourceNodeOptions) {
         super(options);
-        this.options.uuids = this.options.uuids || null;
+        this.options.uuids = this.options.uuids ?? [];
+        this.options.source = this.source ?? new BLEObject();
         this.once('build', this._onBleInit.bind(this));
         this.once('destroy', this.stop.bind(this));
     }
@@ -27,6 +30,10 @@ export class BLESourceNode extends SourceNode<DataFrame> {
 
     public stop(): Promise<void> {
         return new Promise<void>((resolve) => {
+            if (this._subscription !== undefined && this._subscription !== null) {
+                this._subscription.unsubscribe();
+                this._subscription = undefined;
+            }
             BLE.stopScan();
             resolve();
         });
@@ -35,7 +42,7 @@ export class BLESourceNode extends SourceNode<DataFrame> {
     public start(): Promise<void> {
         return new Promise((resolve) => {
             BLE.stopScan();
-            BLE.startScanWithOptions(this.options.uuids, {
+            this._subscription = BLE.startScanWithOptions(this.options.uuids, {
                 reportDuplicates: true,
             }).subscribe((device: BLEDevice) => {
                 const frame = new DataFrame();
@@ -49,7 +56,9 @@ export class BLESourceNode extends SourceNode<DataFrame> {
                     frame.source.removeRelativePositions(pos.referenceObjectUID),
                 );
                 frame.source.addRelativePosition(new RelativeRSSI(beacon, device.rssi));
-                this.push(frame);
+                this.push(frame).catch((ex) => {
+                    this.logger('error', 'Unable to push BLE frame!', ex);
+                });
             });
             resolve();
         });

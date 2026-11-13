@@ -10,7 +10,7 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
 
     constructor(options?: iBeaconSourceNodeOptions) {
         super(options);
-        this.options.uuids = this.options.uuids || null;
+        this.options.uuids = this.options.uuids ?? [];
         this.once('build', this._onBleInit.bind(this));
         this.once('destroy', this.stop.bind(this));
         this.options.source = this.source ?? new BLEObject();
@@ -58,7 +58,7 @@ export class BLEiBeaconSourceNode extends SourceNode<DataFrame> {
                         console.log(data);
                     }
                     // Check if data is valid
-                    if (data === undefined || data.beacons.length === 0) {
+                    if (!data || !data.beacons || data.beacons.length === 0) {
                         return;
                     }
                     const frame = new DataFrame();

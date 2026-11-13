@@ -1,4 +1,4 @@
-import { DataFrame, SourceNode, SensorSourceOptions } from '@openhps/core';
+import { DataFrame, SourceNode, SensorSourceOptions, DataObject } from '@openhps/core';
 import { WLANObject, RelativeRSSI } from '@openhps/rf';
 
 /**
@@ -9,10 +9,12 @@ export class WLANSourceNode extends SourceNode<DataFrame> {
     protected options: SensorSourceOptions;
     private _timer: number;
     private _running = false;
+    private _onDeviceReady: () => void;
 
     constructor(options?: SensorSourceOptions) {
         super(options);
         this.options.interval = this.options.interval || 0;
+        this.options.source = this.source ?? new DataObject(this.uid);
 
         this.once('build', this._onWifiInit.bind(this));
         this.once('destroy', this.stop.bind(this));
@@ -20,25 +22,26 @@ export class WLANSourceNode extends SourceNode<DataFrame> {
 
     private _onWifiInit(): Promise<void> {
         return new Promise((resolve, reject) => {
-            document.addEventListener(
-                'deviceready',
-                function () {
-                    this.logger('debug', 'Initializing Wi-Fi scanning ...');
-                    this.WifiWizard2.isWifiEnabled()
-                        .then((status: boolean) => {
-                            if (!status) {
-                                return reject(new Error(`WiFi not enabled!`));
-                            }
-                            if (this.options.autoStart) {
-                                return this.start();
-                            } else {
-                                return resolve();
-                            }
-                        })
-                        .catch(reject);
-                },
-                false,
-            );
+            this._onDeviceReady = () => {
+                document.removeEventListener('deviceready', this._onDeviceReady, false);
+                this._onDeviceReady = undefined;
+                this.logger('debug', 'Initializing Wi-Fi scanning ...');
+                this.WifiWizard2.isWifiEnabled()
+                    .then((status: boolean) => {
+                        if (!status) {
+                            return reject(new Error(`WiFi not enabled!`));
+                        }
+                        if (this.options.autoStart) {
+                            return this.start()
+                                .then(() => resolve())
+                                .catch(reject);
+                        } else {
+                            return resolve();
+                        }
+                    })
+                    .catch(reject);
+            };
+            document.addEventListener('deviceready', this._onDeviceReady, false);
         });
     }
 
@@ -79,6 +82,10 @@ export class WLANSourceNode extends SourceNode<DataFrame> {
             this._running = false;
             clearTimeout(this._timer);
             this._timer = undefined;
+            if (this._onDeviceReady) {
+                document.removeEventListener('deviceready', this._onDeviceReady, false);
+                this._onDeviceReady = undefined;
+            }
             resolve();
         });
     }
